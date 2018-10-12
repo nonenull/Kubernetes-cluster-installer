@@ -16,7 +16,7 @@ function kubenetes.etcd._install() {
     log.Debug "copy service file to remote ${ip}"
     scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_ETCD_SERVICE_NAME}.${ip} root@${ip}:${KUBE_SYSTEMD_PATH}/${KUBE_ETCD_SERVICE_NAME}
     log.Debug "copy service file to remote done.."
-    scp -C  ${SOURCE_BIN_PATH}/etcd/etcd* root@${ip}:/tmp/
+    scp -C  ${SOURCE_BIN_PATH}/etcd/etcd ${SOURCE_BIN_PATH}/etcd/etcdctl root@${ip}:/tmp/
     ssh root@${ip} /bin/bash << EOF
 systemctl daemon-reload
 systemctl stop ${KUBE_ETCD_SERVICE_NAME}
