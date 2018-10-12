@@ -1,0 +1,6 @@
+./bin
+!./bin/*/VERSION
+!./bin/cfssl
+
+./logs
+./tmp

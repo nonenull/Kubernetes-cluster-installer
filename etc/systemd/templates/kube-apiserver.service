@@ -1,0 +1,31 @@
+[Unit]
+Description=Kube-apiserver Service
+
+[Service]
+ExecStart=/usr/bin/kube-apiserver \
+--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,NodeRestriction \
+--apiserver-count={{APISERVER_COUNT}} \
+--cors-allowed-origins=.* \
+--enable-garbage-collector=false  \
+--etcd-cafile={{SSL_PATH}}/ca.pem \
+--etcd-certfile={{SSL_PATH}}/server.pem \
+--etcd-keyfile={{SSL_PATH}}/server-key.pem \
+--etcd-servers={{ETCD_SERVERS}} \
+--bind-address=0.0.0.0 \
+--secure-port={{APISERVER_PORT}} \
+--tls-cert-file={{SSL_PATH}}/server.pem \
+--tls-private-key-file={{SSL_PATH}}/server-key.pem \
+--client-ca-file={{SSL_PATH}}/ca.pem \
+--service-account-key-file={{SSL_PATH}}/server-key.pem \
+--allow-privileged=true \
+--log-dir=/var/log/k8s/kube-apiserver \
+--logtostderr=false \
+--service-cluster-ip-range={{SERVICE_CLUSTER_IP_RANGE}} \
+--v=5
+
+Type=notify
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

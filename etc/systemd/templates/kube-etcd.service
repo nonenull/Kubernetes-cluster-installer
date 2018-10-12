@@ -1,0 +1,26 @@
+[Unit]
+Description=Kube-etcd Service
+
+[Service]
+ExecStart=/usr/bin/etcd \
+--name={{ETCD_NAME}} \
+--data-dir={{ETCD_DATA_DIR}} \
+--cert-file={{SSL_PATH}}/server.pem \
+--key-file={{SSL_PATH}}/server-key.pem \
+--peer-cert-file={{SSL_PATH}}/server.pem \
+--peer-key-file={{SSL_PATH}}/server-key.pem \
+--trusted-ca-file={{SSL_PATH}}/ca.pem \
+--peer-trusted-ca-file={{SSL_PATH}}/ca.pem \
+--listen-client-urls={{PROTOCOL}}://{{ETCD_IP}}:{{ETCD_LISTEN_CLIENT_PORT}},{{PROTOCOL}}://127.0.0.1:{{ETCD_LISTEN_CLIENT_PORT}} \
+--advertise-client-urls={{PROTOCOL}}://{{ETCD_IP}}:{{ETCD_LISTEN_CLIENT_PORT}} \
+--listen-peer-urls={{PROTOCOL}}://{{ETCD_IP}}:{{ETCD_LISTEN_PEER_PORT}} \
+--initial-advertise-peer-urls={{PROTOCOL}}://{{ETCD_IP}}:{{ETCD_LISTEN_PEER_PORT}} \
+--initial-cluster={{ETCD_INITIAL_CLUSTER}} \
+--initial-cluster-state=new
+
+Type=simple
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

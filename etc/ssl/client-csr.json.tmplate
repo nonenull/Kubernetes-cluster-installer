@@ -1,0 +1,21 @@
+{
+    "CN": "kubernetes",
+    "hosts": [
+        "127.0.0.1",
+        "{{SERVICE_KUBERNETES_IP}}",
+        {{KUBERNETES_HOST}}
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "CHINA",
+            "L": "CHINA",
+            "O": "k8s",
+            "OU": "System"
+        }
+    ]
+}

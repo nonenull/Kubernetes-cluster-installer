@@ -1,0 +1,18 @@
+[Unit]
+Description=Kube-scheduler Service
+
+[Service]
+ExecStart=/usr/bin/kube-scheduler \
+--log-dir=/var/log/k8s/kube-scheduler \
+--logtostderr=false \
+--master={{APISERVER_URL}} \
+--kubeconfig={{CONFIG_PATH}} \
+--leader-elect=true \
+--v=5
+
+Type=simple
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

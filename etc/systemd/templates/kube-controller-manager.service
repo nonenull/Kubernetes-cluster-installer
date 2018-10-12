@@ -1,0 +1,36 @@
+[Unit]
+Description=Kube-controller-manager Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/kube-controller-manager \
+--enable-garbage-collector=false \
+--logtostderr=false \
+--bind-address=127.0.0.1 \
+--secure-port={{CONTROLLER_MANAGE_PORT}} \
+--cluster-signing-cert-file={{SSL_PATH}}/ca.pem \
+--cluster-signing-key-file={{SSL_PATH}}/ca-key.pem \
+--root-ca-file={{SSL_PATH}}/ca.pem \
+--tls-cert-file={{SSL_PATH}}/server.pem \
+--tls-private-key-file={{SSL_PATH}}/server-key.pem \
+--leader-elect=true \
+--service-account-private-key-file={{SSL_PATH}}/server-key.pem \
+--use-service-account-credentials=true \
+--service-cluster-ip-range={{SERVICE_CLUSTER_IP_RANGE}} \
+--log-dir=/var/log/k8s/kube-controller-manager \
+--pod-eviction-timeout=5m0s \
+--master={{APISERVER_URL}} \
+--kubeconfig={{CONFIG_PATH}} \
+--node-monitor-grace-period=40s \
+--terminated-pod-gc-threshold=12500 \
+--leader-elect=true \
+--cluster-cidr=192.168.0.0/16 \
+--allocate-node-cidrs=true \
+--v=5
+
+Type=simple
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,31 @@
+[Unit]
+Description=Kubernetes Kubelet Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=kube-docker.service
+Requires=kube-docker.service
+
+[Service]
+ExecStart=/usr/bin/kubelet \
+--fail-swap-on=false \
+--cgroup-driver=cgroupfs \
+--runtime-cgroups=/systemd/system.slice \
+--kubelet-cgroups=/systemd/system.slice \
+--cluster-dns={{NODE_KUBELET_CLUSTER_DNS}} \
+--kubeconfig={{CONFIG_PATH}} \
+--bootstrap-kubeconfig={{CONFIG_PATH}} \
+--cert-dir={{SSL_PATH}} \
+--cluster-domain={{NODE_KUBELET_CLUSTER_DOMAIN}} \
+--hairpin-mode promiscuous-bridge \
+--serialize-image-pulls=false \
+--pod-infra-container-image=docker.io/kubernetes/pause \
+--log-dir=/var/log/k8s/kubelet \
+--logtostderr=false \
+--allow-privileged=true \
+--v=5
+
+Type=notify
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+192.168.98.148 controller_manager
+192.168.98.149 controller_manager
+
+192.168.98.148 apiserver
+192.168.98.149 apiserver
+
+192.168.98.148 scheduler
+192.168.98.149 scheduler
+
+192.168.98.148 etcd
+192.168.98.149 etcd
+
+192.168.98.146 node
+192.168.98.147 node
