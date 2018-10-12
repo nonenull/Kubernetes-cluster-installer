@@ -1,6 +1,28 @@
 # Kubernetes-cluster-installer
 自制的便捷安装 k8s 集群 的shell脚本
 
+## 测试环境说明
+```
+系统为 centos 7
+
+#cat /etc/os-release
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+```
+
 ## 使用方式
     0. cd xxx/Kubernetes-cluster-installer
     1. 将需要安装的机器, 根据etc/hosts所示规则, 写入其中. etc/hosts 的规则为  {ip} {role}, 此处需要注意的是所有IP都需要做好ssh免密证书登录.

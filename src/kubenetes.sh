@@ -16,13 +16,15 @@ function kubenetes.etcd._install() {
     log.Debug "copy service file to remote ${ip}"
     scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_ETCD_SERVICE_NAME}.${ip} root@${ip}:${KUBE_SYSTEMD_PATH}/${KUBE_ETCD_SERVICE_NAME}
     log.Debug "copy service file to remote done.."
-    scp -C  ${SOURCE_BIN_PATH}/etcd/etcd* root@${ip}:/usr/bin/
+    scp -C  ${SOURCE_BIN_PATH}/etcd/etcd* root@${ip}:/tmp/
     ssh root@${ip} /bin/bash << EOF
+systemctl stop ${KUBE_ETCD_SERVICE_NAME}
+mv /tmp/etcd* /usr/bin/
 chmod +x /usr/bin/etcd*
 /usr/bin/rm -rf ${KUBE_ETCD_DATA_DIR}
 systemctl daemon-reload
 systemctl enable ${KUBE_ETCD_SERVICE_NAME}
-systemctl restart ${KUBE_ETCD_SERVICE_NAME}
+systemctl start ${KUBE_ETCD_SERVICE_NAME}
 EOF
 }
 
@@ -39,12 +41,14 @@ function kubenetes.apiserver.Install(){
 function kubenetes.apiserver._install(){
     systemd.apiserver.Build ${ip} "${apiServerIP}"
     scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_APISERVER_SERVICE_NAME}.${ip} root@${ip}:${KUBE_SYSTEMD_PATH}/${KUBE_APISERVER_SERVICE_NAME}
-    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-apiserver ${SOURCE_BIN_PATH}/kubernetes/client/bin/kubectl root@${ip}:/usr/bin/
+    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-apiserver ${SOURCE_BIN_PATH}/kubernetes/client/bin/kubectl root@${ip}:/tmp/
     ssh root@${ip} /bin/bash << EOF
-chmod +x /usr/bin/kube-apiserver
+systemctl stop ${KUBE_APISERVER_SERVICE_NAME}
+mv /tmp/kube-apiserver /tmp/kubectl /usr/bin/
+chmod +x /usr/bin/kube-apiserver /usr/bin/kubectl
 systemctl daemon-reload
 systemctl enable ${KUBE_APISERVER_SERVICE_NAME}
-systemctl restart ${KUBE_APISERVER_SERVICE_NAME}
+systemctl start ${KUBE_APISERVER_SERVICE_NAME}
 EOF
 }
 
@@ -96,13 +100,15 @@ function kubenetes.scheduler._install(){
     log.Debug "start to install ${ip} : ${KUBE_SCHEDULER_SERVICE_NAME}"
     systemd.scheduler.Build ${ip} "${schedulerIP}"
     scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_SCHEDULER_SERVICE_NAME}.${ip} root@${ip}:${KUBE_SYSTEMD_PATH}/${KUBE_SCHEDULER_SERVICE_NAME}
-    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-scheduler root@${ip}:/usr/bin/
+    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-scheduler root@${ip}:/tmp/
     scp -C  ${SOURCE_KUBE_CONFIG_PATH} root@${ip}:${KUBE_ETC_PATH}/
     ssh root@${ip} /bin/bash  << EOF
+systemctl stop ${KUBE_SCHEDULER_SERVICE_NAME}
+mv /tmp/kube-scheduler /usr/bin/
 chmod +x /usr/bin/kube-scheduler
 systemctl daemon-reload
 systemctl enable ${KUBE_SCHEDULER_SERVICE_NAME}
-systemctl restart ${KUBE_SCHEDULER_SERVICE_NAME}
+systemctl start ${KUBE_SCHEDULER_SERVICE_NAME}
 EOF
 }
 
@@ -125,13 +131,15 @@ function kubenetes.controller-manager._install(){
     ip=$1
     systemd.controller-manager.Build ${ip}
     scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_CONTROLLER_MANAGE_SERVICE_NAME}.${ip} root@${ip}:${KUBE_SYSTEMD_PATH}/${KUBE_CONTROLLER_MANAGE_SERVICE_NAME}
-    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-controller-manager root@${ip}:/usr/bin/
+    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-controller-manager root@${ip}:/tmp/
     scp -C  ${SOURCE_KUBE_CONFIG_PATH} root@${ip}:${KUBE_ETC_PATH}/
     ssh root@${ip} /bin/bash  << EOF
+systemctl stop ${KUBE_CONTROLLER_MANAGE_SERVICE_NAME}
+mv /tmp/kube-controller-manager /usr/bin/
 chmod +x /usr/bin/kube-controller-manager
 systemctl daemon-reload
 systemctl enable ${KUBE_CONTROLLER_MANAGE_SERVICE_NAME}
-systemctl restart ${KUBE_CONTROLLER_MANAGE_SERVICE_NAME}
+systemctl start ${KUBE_CONTROLLER_MANAGE_SERVICE_NAME}
 EOF
 }
 
@@ -182,14 +190,16 @@ function kubenetes.kube-proxy._install() {
     log.Debug "start to install ${curIp} : ${KUBE_NODE_PROXY_SERVICE_NAME}"
     systemd.proxy.Build ${curIp}
     scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_NODE_PROXY_SERVICE_NAME}.${curIp} root@${curIp}:${KUBE_SYSTEMD_PATH}/${KUBE_NODE_PROXY_SERVICE_NAME}
-    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-proxy root@${curIp}:/usr/bin/
+    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kube-proxy root@${curIp}:/tmp/
     scp -C  ${SOURCE_KUBE_CONFIG_PATH} root@${curIp}:${KUBE_ETC_PATH}/
     ssh root@${curIp} /bin/bash << EOF
 yum install -y ipset
+systemctl stop ${KUBE_NODE_PROXY_SERVICE_NAME}
+mv /tmp/kube-proxy /usr/bin/
 chmod +x /usr/bin/kube-proxy
 systemctl daemon-reload
 systemctl enable ${KUBE_NODE_PROXY_SERVICE_NAME}
-systemctl restart ${KUBE_NODE_PROXY_SERVICE_NAME}
+systemctl start ${KUBE_NODE_PROXY_SERVICE_NAME}
 EOF
     log.Info "install ${KUBE_NODE_PROXY_SERVICE_NAME} ${curIp} over"
 }
@@ -205,15 +215,15 @@ function kubenetes.kubelet._install() {
     log.Debug "start to install ${curIp} : ${KUBE_NODE_KUBELET_SERVICE_NAME}"
     systemd.kubelet.Build ${curIp}
     scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_NODE_KUBELET_SERVICE_NAME}.${curIp} root@${curIp}:${KUBE_SYSTEMD_PATH}/${KUBE_NODE_KUBELET_SERVICE_NAME}
-    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kubelet root@${curIp}:/usr/bin/
+    scp -C  ${SOURCE_BIN_PATH}/kubernetes/server/bin/kubelet root@${curIp}:/tmp/
     scp -C  ${SOURCE_KUBE_CONFIG_PATH} root@${curIp}:${KUBE_ETC_PATH}/
     ssh root@${curIp} /bin/bash << EOF
-swapoff -a && swapon -a
+systemctl stop ${KUBE_NODE_KUBELET_SERVICE_NAME}
 chmod +x /usr/bin/kubelet
 systemctl daemon-reload
 systemctl stop docker
 systemctl enable ${KUBE_NODE_KUBELET_SERVICE_NAME}
-systemctl restart ${KUBE_NODE_KUBELET_SERVICE_NAME}
+systemctl start ${KUBE_NODE_KUBELET_SERVICE_NAME}
 EOF
     log.Info "install ${KUBE_NODE_KUBELET_SERVICE_NAME} ${curIp} over"
 }
