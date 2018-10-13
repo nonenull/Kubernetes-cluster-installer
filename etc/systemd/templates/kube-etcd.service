@@ -16,9 +16,9 @@ ExecStart=/usr/bin/etcd \
 --listen-peer-urls={{PROTOCOL}}://{{ETCD_IP}}:{{ETCD_LISTEN_PEER_PORT}} \
 --initial-advertise-peer-urls={{PROTOCOL}}://{{ETCD_IP}}:{{ETCD_LISTEN_PEER_PORT}} \
 --initial-cluster={{ETCD_INITIAL_CLUSTER}} \
---initial-cluster-state=new
+--initial-cluster-state={{ETCD_INITIAL_CLUSTER_STATE}}
 
-Type=simple
+Type=notify
 Restart=on-failure
 LimitNOFILE=65536
 

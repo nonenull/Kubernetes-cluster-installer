@@ -8,16 +8,16 @@ source ${INSTALL_PATH}/src/ssl.sh
 source ${INSTALL_PATH}/src/systemd.sh
 source ${INSTALL_PATH}/src/kubenetes.sh
 
-hosts.Update
-init.Start
-ssl.New
+hosts.Update 1 > /dev/null
+init.Start 1 > /dev/null
+ssl.New 1 > /dev/null
 
-kubenetes.etcd.Install
+kubenetes.etcd.Install 1 > /dev/null
 sleep 1
-kubenetes.apiserver.Install
+kubenetes.apiserver.Install 1 > /dev/null
 sleep 1
-kubenetes.scheduler.Install
+kubenetes.scheduler.Install 1 > /dev/null
 sleep 1
-kubenetes.controller-manager.Install
+kubenetes.controller-manager.Install 1 > /dev/null
 sleep 1
-kubenetes.node.Install
+kubenetes.node.Install 1 > /dev/null

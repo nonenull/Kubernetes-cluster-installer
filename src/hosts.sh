@@ -7,7 +7,7 @@ function hosts._load(){
     while read line;do
         local hostArr=(${line// / })
         local ip=${hostArr[0]}
-        local  rolaName=${hostArr[1]}
+        local rolaName=${hostArr[1]}
         #log.Info "ip=${hostArr[0]}  host=${hostArr[1]}"
         if [[ ! ${ip} == "" ]];then
             CONFIG_IPDICT+=([${rolaName}]="${ip} ")
