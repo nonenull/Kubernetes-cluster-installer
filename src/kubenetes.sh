@@ -220,6 +220,7 @@ function kubenetes.kubelet._install() {
     ssh root@${curIp} /bin/bash << EOF
 systemctl daemon-reload
 systemctl stop ${KUBE_NODE_KUBELET_SERVICE_NAME}
+mv /tmp/kubelet /usr/bin/
 chmod +x /usr/bin/kubelet
 systemctl stop docker
 systemctl enable ${KUBE_NODE_KUBELET_SERVICE_NAME}
