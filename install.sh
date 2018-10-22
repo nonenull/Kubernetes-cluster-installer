@@ -11,7 +11,6 @@ source ${INSTALL_PATH}/src/kubenetes.sh
 hosts.Update 1 > /dev/null
 init.Start 1 > /dev/null
 ssl.New 1 > /dev/null
-
 kubenetes.etcd.Install 1 > /dev/null
 sleep 1
 kubenetes.apiserver.Install 1 > /dev/null
@@ -21,3 +20,5 @@ sleep 1
 kubenetes.controller-manager.Install 1 > /dev/null
 sleep 1
 kubenetes.node.Install 1 > /dev/null
+sleep 1
+kubenetes.calico.Install 1 > /dev/null

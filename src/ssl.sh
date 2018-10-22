@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
+cfsslCmd=${SOURCE_BIN_PATH}/cfssl/cfssl
+cfssljsonCmd=${SOURCE_BIN_PATH}/cfssl/cfssljson
+
 function ssl._generate() {
-    local cfsslCmd=${SOURCE_BIN_PATH}/cfssl/cfssl
-    local cfssljsonCmd=${SOURCE_BIN_PATH}/cfssl/cfssljson
     local hostFile="${SOURCE_ETC_PATH}/hosts"
-    local sslPath="${SOURCE_ETC_PATH}/ssl"
     local serverCsrFileName="server-csr.json"
     local clientCsrFileName="client-csr.json"
 
-    cd ${sslPath} && log.Debug "cd to ${sslPath}"
+    cd ${SOURCE_SSL_PATH}
+    log.Debug "==================$(pwd)"
     /usr/bin/rm -rf *.pem *.csr ${serverCsrFileName} ${clientCsrFileName}
     # generate ca pem
     ${cfsslCmd} gencert -initca ca-csr.json | ${cfssljsonCmd} -bare ca
     # generate kubernetes pem
-
-    /usr/bin/cp -rf ${serverCsrFileName}.tmplate ${serverCsrFileName}
-    /usr/bin/cp -rf ${clientCsrFileName}.tmplate ${clientCsrFileName}
+    /usr/bin/cp -rf ${serverCsrFileName}.template ${serverCsrFileName}
+    /usr/bin/cp -rf ${clientCsrFileName}.template ${clientCsrFileName}
     local hostsStr=$(cat ${hostFile} | awk -F ' ' '{print $1}' | sed '/^\s*$/d' | sed 's/$/",/;s/^/"/' | sort | uniq)
     #log.Debug "hostsStr: ${hostsStr}"
     sed -i "s/{{KUBERNETES_HOST}}/$(echo ${hostsStr: 0:-1})/" ${serverCsrFileName}
@@ -31,7 +31,6 @@ function ssl._sync() {
     local sslCheckFile="${INSTALL_PATH}/tmp/ssl_check"
     cat /dev/null > ${sslCheckFile}
     local key
-    local sslPath="${SOURCE_ETC_PATH}/ssl"
     for key in $(echo ${!CONFIG_IPDICT[*]});do
         local ips=${CONFIG_IPDICT[${key}]}
         local ip
@@ -40,7 +39,7 @@ function ssl._sync() {
             local  isIpExist=$(grep "${ip}" ${sslCheckFile} | wc -l)
             if [[ ${isIpExist} -eq 0 ]];then
                 # here is do some other job (add new user)
-                scp -C  ${sslPath}/*.pem root@${ip}:${KUBE_SSL_PATH}
+                scp -C  ${SOURCE_SSL_PATH}/*.pem root@${ip}:${KUBE_SSL_PATH}
                 if [[ $? -eq 0 ]];then
                     echo "${ip}" >> ${sslCheckFile}
                 else
@@ -52,6 +51,8 @@ function ssl._sync() {
 }
 
 function ssl.New(){
+    chmod +x ${cfsslCmd} ${cfssljsonCmd}
+
     ssl._generate
     ssl._sync
 }

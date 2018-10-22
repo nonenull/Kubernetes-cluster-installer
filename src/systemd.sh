@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+mkdir -p ${SOURCE_SYSTEMD_PRODUCE_PATH}
+
 function systemd._replaceVar() {
     local newServiceFile=$1
     local varStrs=$(grep -oE "\{{[_A-Z]*}}" ${newServiceFile})
@@ -90,17 +92,18 @@ function systemd.docker.Build() {
     systemd._replaceVar ${newServiceFile}
 }
 
-function systemd.calico.Build() {
+function systemd.calico.ctl.Build(){
     local curIp=$1
-    local etcdIp=${CONFIG_IPDICT["${KUBE_ETCD_HOSTNAME}"]}
-    local KUBE_ETCD_ENDPOINTS=""
-    local ip
-    for ip in ${etcdIp};do
-        local curCluster="${KUBE_PROTOCOL}://${ip}:${KUBE_ETCD_LISTEN_CLIENT_PORT}"
-        KUBE_ETCD_ENDPOINTS+="${curCluster},"
-    done
-    KUBE_ETCD_ENDPOINTS=${KUBE_ETCD_ENDPOINTS:0:-1}
-    local newServiceFile="${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_NODE_CALICO_SERVICE_NAME}.${curIp}"
-    /usr/bin/cp -rf ${SOURCE_SYSTEMD_TEMPLATE_PATH}/${KUBE_NODE_CALICO_SERVICE_NAME} ${newServiceFile}
-    systemd._replaceVar ${newServiceFile}
+    local newCfgFile="${SOURCE_CALICO_ETC_PATH}/${KUBE_CALICOCTL_CONFIG_NAME}"
+    /usr/bin/cp -rf ${SOURCE_CALICO_ETC_PATH}/${KUBE_CALICOCTL_CONFIG_NAME}.template ${newCfgFile}
+    systemd._replaceVar ${newCfgFile}
+}
+
+function systemd.calico.node.Build(){
+    local curIp=$1
+    local newCfgFile="${SOURCE_CALICO_ETC_PATH}/${KUBE_CALICONODE_CONFIG_NAME}"
+    /usr/bin/cp -rf ${SOURCE_CALICO_ETC_PATH}/${KUBE_CALICONODE_CONFIG_NAME}.template ${newCfgFile}
+
+    local KUBE_CALICO_VERSION=$(cat ${SOURCE_BIN_PATH}/calico/VERSION)
+    systemd._replaceVar ${newCfgFile}
 }

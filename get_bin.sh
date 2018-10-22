@@ -1,11 +1,12 @@
 #!/bin/bash
 
 declare -x INSTALL_PATH=$(pwd)
+source ${INSTALL_PATH}/src/config.sh
 source ${INSTALL_PATH}/src/log.sh
 
-BIN_PATH=${INSTALL_PATH}/bin
-BIN_KUBE_PATH=${BIN_PATH}/kubernetes
-BIN_ETCD_PATH=${BIN_PATH}/etcd
+BIN_KUBE_PATH=${SOURCE_BIN_PATH}/kubernetes
+BIN_ETCD_PATH=${SOURCE_BIN_PATH}/etcd
+BIN_CALICO_PATH=${SOURCE_BIN_PATH}/calico
 
 function bin.kubernetes.Get (){
     local version=$(cat ${BIN_KUBE_PATH}/VERSION)
@@ -16,8 +17,10 @@ function bin.kubernetes.Get (){
 
     local serverFileFullName=$(echo ${serverUrl} | awk -F '/' '{print $NF}')
     local clientFileFullName=$(echo ${clientUrl} | awk -F '/' '{print $NF}')
-    wget ${serverUrl}
-    wget ${clientUrl}
+    log.Debug "download ${serverUrl}"
+    curl -O -L ${serverUrl}
+    log.Debug "download ${clientUrl}"
+    curl -O -L ${clientUrl}
     tar zxf ./${serverFileFullName} -C ../
     tar zxf ./${clientFileFullName} -C ../
 }
@@ -27,19 +30,26 @@ function bin.etcd.Get (){
     log.Debug "etcd version === ${version}"
     cd ${BIN_ETCD_PATH}
     # init the path
-    /usr/bin/rm `ls|egrep -v VERSION`
+    /usr/bin/rm -rf `ls|egrep -v VERSION`
     # start
-    wget https://github.com/etcd-io/etcd/releases/download/${version}/etcd-${version}-linux-amd64.tar.gz
+    curl -O -L https://github.com/etcd-io/etcd/releases/download/${version}/etcd-${version}-linux-amd64.tar.gz
     tar zxf ./etcd-${version}-linux-amd64.tar.gz
     /usr/bin/mv ./etcd-${version}-linux-amd64/* ./
     /usr/bin/rm -rf ./etcd-${version}-linux-amd64
 }
 
-#function bin.calico.Get (){
-#
-#}
+function bin.calico.Get (){
+    local version=$(cat ${BIN_CALICO_PATH}/VERSION)
+    log.Debug "calico version === ${version}"
+    cd ${BIN_CALICO_PATH}
+    /usr/bin/rm -rf `ls|egrep -v VERSION`
+    curl -O -L https://github.com/projectcalico/calicoctl/releases/download/${version}/calicoctl
+}
 
+if [[ ! ${PROXY} == "" ]];then
+    export http_proxy=http://${PROXY} https_proxy=https://${PROXY}
+fi
 bin.kubernetes.Get
 bin.etcd.Get
-#bin.calico.Get
+bin.calico.Get
 

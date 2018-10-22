@@ -20,7 +20,7 @@ ExecStart=/usr/bin/kube-apiserver \
 --allow-privileged=true \
 --log-dir=/var/log/k8s/kube-apiserver \
 --logtostderr=false \
---service-cluster-ip-range={{SERVICE_CLUSTER_IP_RANGE}} \
+--service-cluster-ip-range={{SERVICE_NETWORK_CIDR}} \
 --v=5
 
 Type=notify

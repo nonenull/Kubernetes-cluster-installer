@@ -9,7 +9,7 @@ function init.Start() {
         local ip
         local proxyCmd=""
         if [[ ! ${PROXY} == "" ]];then
-            proxyCmd="export http_proxy=${PROXY}"
+            proxyCmd="export http_proxy=http://${PROXY} https_proxy=https://${PROXY}"
         fi
         local installDocker
         if [[ ${key} == "node" ]];then

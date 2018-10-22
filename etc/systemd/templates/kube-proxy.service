@@ -5,12 +5,12 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/kube-proxy \
---bind-address={{NODE_PROXY_ADDR}} \
---hostname-override={{NODE_PROXY_HOSTNAME}} \
---cluster-cidr={{NODE_PROXY_CLUSTER_CIDR}} \
+--bind-address=0.0.0.0 \
+--cluster-cidr={{POD_NETWORK_CIDR}} \
 --kubeconfig={{CONFIG_PATH}} \
 --logtostderr=false \
 --log-dir=/var/log/k8s/proxy \
+--proxy-mode=iptables \
 --v=5
 
 Type=simple

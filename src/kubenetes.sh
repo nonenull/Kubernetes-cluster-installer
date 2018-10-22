@@ -83,7 +83,7 @@ function kubenetes.client.config._create() {
 
 function kubenetes.scheduler.Install(){
     local kubeType="scheduler"
-    local KUBE_CONFIG_NAME="${kubeType}-kubeconfig"
+    local KUBE_CONFIG_NAME="${kubeType}${KUBE_HOSTNAME_SUFFIX}"
     local KUBE_CONFIG_PATH="${KUBE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     local SOURCE_KUBE_CONFIG_PATH="${SOURCE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     kubenetes.client.config._create
@@ -113,8 +113,7 @@ EOF
 }
 
 function kubenetes.controller-manager.Install(){
-    local kubeType="controller-manager"
-    local KUBE_CONFIG_NAME="${kubeType}-kubeconfig"
+    local KUBE_CONFIG_NAME="${KUBE_CONTROLLER_MANAGE_HOSTNAME}${KUBE_HOSTNAME_SUFFIX}"
     local KUBE_CONFIG_PATH="${KUBE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     local SOURCE_KUBE_CONFIG_PATH="${SOURCE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     kubenetes.client.config._create
@@ -148,7 +147,6 @@ function kubenetes.node.Install() {
     local ip
     for ip in ${nodeIP};do
         kubenetes.docker._install ${ip}
-#        kubenetes.calico._install ${ip}
         kubenetes.kube-proxy._install ${ip}
         kubenetes.kubelet._install ${ip}
     done
@@ -168,20 +166,9 @@ EOF
     log.Info "install docker ${curIp} over"
 }
 
-function kubenetes.calico._install() {
-    local curIp=$1
-    systemd.calico.Build ${curIp}
-    scp -C  ${SOURCE_SYSTEMD_PRODUCE_PATH}/${KUBE_NODE_CALICO_SERVICE_NAME}.${curIp} root@${curIp}:${KUBE_SYSTEMD_PATH}/${KUBE_NODE_CALICO_SERVICE_NAME}
-    ssh root@${curIp} /bin/bash << EOF
-systemctl daemon-reload
-systemctl enable ${KUBE_NODE_CALICO_SERVICE_NAME}
-systemctl restart ${KUBE_NODE_CALICO_SERVICE_NAME}
-EOF
-}
-
 function kubenetes.kube-proxy._install() {
     local kubeType="proxy"
-    local KUBE_CONFIG_NAME="${kubeType}-kubeconfig"
+    local KUBE_CONFIG_NAME="${kubeType}${KUBE_HOSTNAME_SUFFIX}"
     local KUBE_CONFIG_PATH="${KUBE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     local SOURCE_KUBE_CONFIG_PATH="${SOURCE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     kubenetes.client.config._create
@@ -206,7 +193,7 @@ EOF
 
 function kubenetes.kubelet._install() {
     local kubeType="kubelet"
-    local KUBE_CONFIG_NAME="${kubeType}-kubeconfig"
+    local KUBE_CONFIG_NAME="${kubeType}${KUBE_HOSTNAME_SUFFIX}"
     local KUBE_CONFIG_PATH="${KUBE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     local SOURCE_KUBE_CONFIG_PATH="${SOURCE_ETC_PATH}/${KUBE_CONFIG_NAME}"
     kubenetes.client.config._create
@@ -227,4 +214,35 @@ systemctl enable ${KUBE_NODE_KUBELET_SERVICE_NAME}
 systemctl start ${KUBE_NODE_KUBELET_SERVICE_NAME}
 EOF
     log.Info "install ${KUBE_NODE_KUBELET_SERVICE_NAME} ${curIp} over"
+}
+
+function kubenetes.calico.Install() {
+    local masterIP=${CONFIG_IPDICT["${KUBE_APISERVER_HOSTNAME}"]}
+    local ip
+    for ip in ${masterIP};do
+        log.Debug "start to install calico ${ip}"
+        kubenetes.calico.ctl._install ${ip}
+        kubenetes.calico.node._install ${ip}
+    done
+}
+
+function kubenetes.calico.ctl._install() {
+    local curIp=$1
+    systemd.calico.ctl.Build ${curIp}
+    scp -C ${SOURCE_CALICO_BIN_PATH}/calicoctl root@${curIp}:/usr/bin
+    ssh root@${curIp} /bin/bash << EOF
+chmod +x /usr/bin/calicoctl
+mkdir -p ${KUBE_CALICO_ETC_PATH}
+EOF
+    scp -C ${SOURCE_CALICO_ETC_PATH}/${KUBE_CALICOCTL_CONFIG_NAME} root@${curIp}:${KUBE_CALICO_ETC_PATH}
+}
+
+function kubenetes.calico.node._install() {
+    local curIp=$1
+    systemd.calico.node.Build ${curIp}
+    scp -C  ${SOURCE_CALICO_ETC_PATH}/${KUBE_CALICONODE_CONFIG_NAME} root@${curIp}:${KUBE_CALICO_ETC_PATH}
+    ssh root@${curIp} /bin/bash << EOF
+kubectl apply -f ${KUBE_CALICO_ETC_PATH}/${KUBE_CALICONODE_CONFIG_NAME}
+kubectl describe pods -n kube-system
+EOF
 }

@@ -16,7 +16,6 @@ ExecStart=/usr/bin/kube-controller-manager \
 --leader-elect=true \
 --service-account-private-key-file={{SSL_PATH}}/server-key.pem \
 --use-service-account-credentials=true \
---service-cluster-ip-range={{SERVICE_CLUSTER_IP_RANGE}} \
 --log-dir=/var/log/k8s/kube-controller-manager \
 --pod-eviction-timeout=5m0s \
 --master={{APISERVER_URL}} \
@@ -24,7 +23,8 @@ ExecStart=/usr/bin/kube-controller-manager \
 --node-monitor-grace-period=40s \
 --terminated-pod-gc-threshold=12500 \
 --leader-elect=true \
---cluster-cidr=192.168.0.0/16 \
+--cluster-cidr={{POD_NETWORK_CIDR}} \
+--service-cluster-ip-range={{SERVICE_NETWORK_CIDR}} \
 --allocate-node-cidrs=true \
 --v=5
 
