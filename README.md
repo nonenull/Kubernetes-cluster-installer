@@ -28,6 +28,7 @@ REDHAT_SUPPORT_PRODUCT_VERSION="7"
     1. 将需要安装的机器, 根据etc/hosts所示规则, 写入其中. etc/hosts 的规则为  {ip} {role}, 此处需要注意的是所有IP都需要做好ssh免密证书登录.
     2. 配置好bin/目录下各个依赖目录VERSION文件, 执行./get_bin.sh 自动获取相应的二进制包并解压
     3. 第二步完成后, 执行 ./install.sh 可开始安装 (如果仅需要安装一部分, 则注释相应的函数即可)
+    注: 正式使用建议再安装一个 ingress
 
 ## 目录说明
     Kubernetes-cluster-installer
@@ -39,6 +40,7 @@ REDHAT_SUPPORT_PRODUCT_VERSION="7"
            | -- kubernetes  k8s目录
            |
         | -- etc    配置目录
+           | -- calico  存放calico配置文件
            | -- ssl     存放证书模板
            | -- systemd 存放systemd 服务模板
            | -- hosts   k8s主机配置文件
