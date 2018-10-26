@@ -10,14 +10,14 @@ ExecStart=/usr/bin/kubelet \
 --cgroup-driver=cgroupfs \
 --runtime-cgroups=/systemd/system.slice \
 --kubelet-cgroups=/systemd/system.slice \
---cluster-dns={{NODE_KUBELET_CLUSTER_DNS}} \
+--cluster-dns={{CLUSTER_DNS}} \
+--cluster-domain={{CLUSTER_DOMAIN}} \
 --kubeconfig={{CONFIG_PATH}} \
 --bootstrap-kubeconfig={{CONFIG_PATH}} \
 --cert-dir={{SSL_PATH}} \
---cluster-domain={{NODE_KUBELET_CLUSTER_DOMAIN}} \
 --hairpin-mode promiscuous-bridge \
 --serialize-image-pulls=false \
---pod-infra-container-image=docker.io/kubernetes/pause \
+--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/kencent/pause \
 --log-dir=/var/log/k8s/kubelet \
 --logtostderr=false \
 --allow-privileged=true \

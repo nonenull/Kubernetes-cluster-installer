@@ -22,3 +22,5 @@ sleep 1
 kubenetes.node.Install 1 > /dev/null
 sleep 1
 kubenetes.calico.Install 1 > /dev/null
+sleep 1
+kubenetes.dns.Install 1 > /dev/null

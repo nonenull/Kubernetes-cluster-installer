@@ -246,3 +246,24 @@ kubectl apply -f ${KUBE_CALICO_ETC_PATH}/${KUBE_CALICONODE_CONFIG_NAME}
 kubectl describe pods -n kube-system
 EOF
 }
+
+function kubenetes.dns.Install() {
+    local masterIP=${CONFIG_IPDICT["${KUBE_APISERVER_HOSTNAME}"]}
+    local ip
+    for ip in ${masterIP};do
+        log.Debug "start to install kube-dns ${ip}"
+        kubenetes.dns._install ${ip}
+    done
+}
+
+function kubenetes.dns._install() {
+    local curIp=$1
+    systemd.kube-dns.Build ${curIp}
+    ssh root@${curIp} "mkdir -p ${KUBE_DNS_ETC_PATH}"
+    scp -C  ${SOURCE_KUBE_DNS_PATH}/${KUBE_DNS_CONFIG_NAME} ${SOURCE_KUBE_DNS_PATH}/${KUBE_DNS_AUTOSCALER_CONFIG_NAME} root@${curIp}:${KUBE_DNS_ETC_PATH}
+    ssh root@${curIp} "kubectl apply -f ${KUBE_DNS_ETC_PATH}/${KUBE_DNS_CONFIG_NAME}"
+    ssh root@${curIp} /bin/bash << EOF
+kubectl apply -f ${KUBE_DNS_ETC_PATH}/${KUBE_DNS_CONFIG_NAME}
+kubectl apply -f ${KUBE_DNS_ETC_PATH}/${KUBE_DNS_AUTOSCALER_CONFIG_NAME}
+EOF
+}

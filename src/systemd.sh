@@ -107,3 +107,10 @@ function systemd.calico.node.Build(){
     local KUBE_CALICO_VERSION=$(cat ${SOURCE_BIN_PATH}/calico/VERSION)
     systemd._replaceVar ${newCfgFile}
 }
+
+function systemd.kube-dns.Build(){
+    local curIp=$1
+    local newCfgFile="${SOURCE_KUBE_DNS_PATH}/${KUBE_DNS_CONFIG_NAME}"
+    /usr/bin/cp -rf ${SOURCE_KUBE_DNS_PATH}/${KUBE_DNS_CONFIG_NAME}.template ${newCfgFile}
+    systemd._replaceVar ${newCfgFile}
+}

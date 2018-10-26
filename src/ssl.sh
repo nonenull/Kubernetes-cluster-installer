@@ -9,7 +9,6 @@ function ssl._generate() {
     local clientCsrFileName="client-csr.json"
 
     cd ${SOURCE_SSL_PATH}
-    log.Debug "==================$(pwd)"
     /usr/bin/rm -rf *.pem *.csr ${serverCsrFileName} ${clientCsrFileName}
     # generate ca pem
     ${cfsslCmd} gencert -initca ca-csr.json | ${cfssljsonCmd} -bare ca
